@@ -9,7 +9,7 @@ import "@blocknote/mantine/style.css";
 
 // 作成したEditorコンポーネントをクライアントサイドでのみ動的に読み込む
 // ssr: false オプションでサーバーサイドレンダリングを無効化する
-const Editor = dynamic(() => import("./editor"), { ssr: false });
+const Editor = dynamic(() => import("../components/editor"), { ssr: false });
 
 export default function Home() {
   return (
