@@ -16,7 +16,6 @@ export default function Home() {
     <div>
       <main>
         <div className="h-[90vh] w-[90vw]">
-          <a href="">グエーーーー</a>
           <Editor />
         </div>
       </main>
