@@ -1,0 +1,27 @@
+# AIレビューを有効にするには:
+# 1. GitHub Secrets に ANTHROPIC_API_KEY を設定
+# 2. 下の workflow_dispatch を pull_request に変更
+#
+# on:
+#   pull_request:
+#     types: [review_requested]
+
+name: AI Code Review
+
+on:
+  workflow_dispatch: # 手動実行のみ（最初はオフ）
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          model: claude-sonnet-4-6
+          review_comment_prefix: "[AI Review]"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
