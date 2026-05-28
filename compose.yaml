@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: note_app
+    ports:
+      # ホスト側は 5433 (5432 は他プロジェクトが使用中のため)
+      - "5433:5432"
+    volumes:
+      - note_app_pgdata:/var/lib/postgresql/data
+
+volumes:
+  note_app_pgdata:

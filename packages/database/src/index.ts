@@ -1,20 +1,19 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-// Prisma 7 では new PrismaClient() に options(driver adapter 等)が必須。
-// DB再接続時にここで adapter を渡す:
-//   import { PrismaPg } from "@prisma/adapter-pg";
-//   return new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
+// Prisma 7 は接続に driver adapter が必須。Postgres は @prisma/adapter-pg を使う。
 function getClient(): PrismaClient {
   if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient();
+    const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+    globalForPrisma.prisma = new PrismaClient({ adapter });
   }
   return globalForPrisma.prisma;
 }
 
 // 遅延生成: 実際にプロパティへアクセスするまで PrismaClient を作らない。
-// これにより DB に触れない経路(例: /health)は adapter 未設定でも起動できる。
+// これにより DB に触れない経路(例: /health)は接続情報が無くても起動できる。
 export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
   get(_target, prop, receiver) {
     const client = getClient();
