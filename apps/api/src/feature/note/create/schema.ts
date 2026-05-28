@@ -25,7 +25,8 @@ export const CreateNoteErrorResponse = z
 export const CreateNoteRoute = createRoute({
   method: "post",
   path: "/notes",
-  description: "ノートを1件作成する",
+  description: "ノートを1件作成する (要ログイン)",
+  security: [{ sessionCookie: [] }],
   request: {
     body: {
       content: {
@@ -43,6 +44,14 @@ export const CreateNoteRoute = createRoute({
         },
       },
       description: "作成成功",
+    },
+    401: {
+      content: {
+        "application/json": {
+          schema: CreateNoteErrorResponse,
+        },
+      },
+      description: "未ログイン",
     },
     500: {
       content: {

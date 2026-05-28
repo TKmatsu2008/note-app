@@ -1,14 +1,10 @@
 import type { Result } from "neverthrow";
 import type { CreatedNote, CreateNoteRepository } from "./repository";
 
-// 案A: 認証を実装するまでは固定のダミーユーザーIDを使う。
-// DBを再接続したら、このIDの User 行が存在する必要がある(FK制約)。
-// 認証の縦切りを追加したら、セッションから取得した本物のIDに差し替える。
-const DUMMY_USER_ID = "dummy-user-id";
-
 export type CreateNoteInput = {
   title: string;
   content: string;
+  userId: string;
 };
 
 export type CreateNoteError = "DB_ERROR";
@@ -24,7 +20,7 @@ export class CreateNoteUseCase {
       .create({
         title: input.title,
         content: input.content,
-        userId: DUMMY_USER_ID,
+        userId: input.userId,
       })
       .mapErr((): CreateNoteError => "DB_ERROR");
   }
