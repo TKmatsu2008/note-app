@@ -33,6 +33,9 @@ export default function AuthStatus() {
   if (me) {
     return (
       <div className="flex items-center gap-3 text-sm">
+        <Link href="/notes" className="underline">
+          ノート
+        </Link>
         <span>{me.name ?? me.email} でログイン中</span>
         <button
           type="button"
