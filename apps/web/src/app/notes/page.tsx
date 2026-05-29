@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 
 type Note = {
@@ -20,22 +20,33 @@ export default function NotesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const load = useCallback(async () => {
+  // 初回ロード (未ログインは /login へ誘導)
+  useEffect(() => {
+    let ignore = false;
+    (async () => {
+      const res = await apiFetch("/notes");
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
+      if (!ignore && res.ok) {
+        setNotes((await res.json()) as Note[]);
+      }
+      if (!ignore) {
+        setLoading(false);
+      }
+    })();
+    return () => {
+      ignore = true;
+    };
+  }, [router]);
+
+  async function refresh() {
     const res = await apiFetch("/notes");
-    // 未ログインはログイン画面へ (認証ガード)
-    if (res.status === 401) {
-      router.push("/login");
-      return;
-    }
     if (res.ok) {
       setNotes((await res.json()) as Note[]);
     }
-    setLoading(false);
-  }, [router]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  }
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -47,7 +58,7 @@ export default function NotesPage() {
     if (res.ok) {
       setTitle("");
       setContent("");
-      await load();
+      await refresh();
       return;
     }
     const data = await res.json().catch(() => ({}));
@@ -56,7 +67,9 @@ export default function NotesPage() {
 
   async function onDelete(id: string) {
     const res = await apiFetch(`/notes/${id}`, { method: "DELETE" });
-    if (res.ok) await load();
+    if (res.ok) {
+      await refresh();
+    }
   }
 
   if (loading) {
