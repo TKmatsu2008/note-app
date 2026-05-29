@@ -5,6 +5,8 @@ import { logoutRouter } from "./feature/auth/logout/router";
 import { meRouter } from "./feature/auth/me/router";
 import { registerRouter } from "./feature/auth/register/router";
 import { createNoteRouter } from "./feature/note/create/router";
+import { deleteNoteRouter } from "./feature/note/delete/router";
+import { listNotesRouter } from "./feature/note/list/router";
 import { sessionMiddleware } from "./shared/session-middleware/middleware";
 import type { SessionEnv } from "./shared/session-middleware/types";
 
@@ -33,6 +35,8 @@ app.route("/", meRouter());
 
 // ノート
 app.route("/", createNoteRouter());
+app.route("/", listNotesRouter());
+app.route("/", deleteNoteRouter());
 
 app.openAPIRegistry.registerComponent("securitySchemes", "sessionCookie", {
   type: "apiKey",
