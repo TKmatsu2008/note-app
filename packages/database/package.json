@@ -16,9 +16,12 @@
     "check:type": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "^7.2.0"
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "pg": "^8.13.0"
   },
   "devDependencies": {
+    "@types/pg": "^8.11.10",
     "dotenv": "^16.4.5",
     "prisma": "^7.2.0",
     "typescript": "^5"
