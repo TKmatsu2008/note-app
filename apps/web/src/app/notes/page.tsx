@@ -20,6 +20,11 @@ export default function NotesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // 編集中のノート
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+
   // 初回ロード (未ログインは /login へ誘導)
   useEffect(() => {
     let ignore = false;
@@ -72,6 +77,27 @@ export default function NotesPage() {
     }
   }
 
+  function startEdit(n: Note) {
+    setEditingId(n.id);
+    setEditTitle(n.title);
+    setEditContent(n.content);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+  }
+
+  async function onUpdate(id: string) {
+    const res = await apiFetch(`/notes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ title: editTitle, content: editContent }),
+    });
+    if (res.ok) {
+      setEditingId(null);
+      await refresh();
+    }
+  }
+
   if (loading) {
     return <main className="p-8">読み込み中...</main>;
   }
@@ -114,24 +140,64 @@ export default function NotesPage() {
         )}
         {notes.map((n) => (
           <li key={n.id} className="rounded border p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h2 className="font-bold">{n.title}</h2>
-                <p className="whitespace-pre-wrap break-words text-sm">
-                  {n.content}
-                </p>
-                <p className="mt-1 text-xs text-gray-400">
-                  {new Date(n.createdAt).toLocaleString()}
-                </p>
+            {editingId === n.id ? (
+              <div className="flex flex-col gap-2">
+                <input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="rounded border px-3 py-2"
+                />
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="min-h-24 rounded border px-3 py-2"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onUpdate(n.id)}
+                    className="rounded bg-black px-3 py-1 text-sm text-white"
+                  >
+                    保存
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="rounded border px-3 py-1 text-sm"
+                  >
+                    キャンセル
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => onDelete(n.id)}
-                className="shrink-0 rounded border px-2 py-1 text-sm"
-              >
-                削除
-              </button>
-            </div>
+            ) : (
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="font-bold">{n.title}</h2>
+                  <p className="whitespace-pre-wrap break-words text-sm">
+                    {n.content}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-400">
+                    {new Date(n.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => startEdit(n)}
+                    className="rounded border px-2 py-1 text-sm"
+                  >
+                    編集
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(n.id)}
+                    className="rounded border px-2 py-1 text-sm"
+                  >
+                    削除
+                  </button>
+                </div>
+              </div>
+            )}
           </li>
         ))}
       </ul>
